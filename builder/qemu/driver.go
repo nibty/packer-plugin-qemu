@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type DriverCancelCallback func(state multistep.StateBag) bool
@@ -55,6 +56,7 @@ type QemuDriver struct {
 	vmCmd   *exec.Cmd
 	vmEndCh <-chan int
 	lock    sync.Mutex
+    ui      packersdk.Ui
 }
 
 func (d *QemuDriver) Stop() error {
@@ -233,11 +235,14 @@ func (d *QemuDriver) Version() (string, error) {
 
 func logReader(name string, r io.Reader) {
 	bufR := bufio.NewReader(r)
+    s.ui = state.Get("ui").(packersdk.Ui)
+
 	for {
 		line, err := bufR.ReadString('\n')
 		if line != "" {
 			line = strings.TrimRightFunc(line, unicode.IsSpace)
-			log.Printf("%s: %s", name, line)
+// 			log.Printf("%s: %s", name, line)
+			s.ui.say("%s: %s" % (name, line))
 		}
 
 		if err == io.EOF {
