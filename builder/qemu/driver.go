@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type DriverCancelCallback func(state multistep.StateBag) bool
@@ -55,6 +56,8 @@ type QemuDriver struct {
 	vmCmd   *exec.Cmd
 	vmEndCh <-chan int
 	lock    sync.Mutex
+	ui      packersdk.Ui
+	config  Config
 }
 
 func (d *QemuDriver) Stop() error {
@@ -119,8 +122,13 @@ func (d *QemuDriver) Qemu(qemuArgs ...string) error {
 		return err
 	}
 
-	go logReader("Qemu stdout", stdout_r)
-	go logReader("Qemu stderr", stderr_r)
+	if d.config.SerialOut {
+		go d.outputReader(stderr_r, true)
+		go d.outputReader(stdout_r, false)
+	} else {
+		go logReader("Qemu stdout", stdout_r)
+		go logReader("Qemu stderr", stderr_r)
+	}
 
 	log.Printf("Started Qemu. Pid: %d", cmd.Process.Pid)
 
@@ -238,6 +246,26 @@ func logReader(name string, r io.Reader) {
 		if line != "" {
 			line = strings.TrimRightFunc(line, unicode.IsSpace)
 			log.Printf("%s: %s", name, line)
+		}
+
+		if err == io.EOF {
+			break
+		}
+	}
+}
+
+func (d *QemuDriver) outputReader(r io.Reader, isError bool) {
+	bufR := bufio.NewReader(r)
+
+	for {
+		line, err := bufR.ReadString('\n')
+		if line != "" {
+			line = strings.TrimRightFunc(line, unicode.IsSpace)
+			if isError {
+				d.ui.Error(line)
+			} else {
+				d.ui.Say(line)
+			}
 		}
 
 		if err == io.EOF {

@@ -401,6 +401,8 @@ type Config struct {
 	// `virtio-scsi`. The Qemu builder uses `virtio` by default.
 	// Some ARM64 images require `virtio-scsi`.
 	CDROMInterface string `mapstructure:"cdrom_interface" required:"false"`
+	// Whether or not to display serial output from qemu.
+	SerialOut bool `mapstructure:"serial_out" required:"false"`
 
 	// TODO(mitchellh): deprecate
 	RunOnce bool `mapstructure:"run_once"`

@@ -131,6 +131,7 @@ type FlatConfig struct {
 	VNCPortMax                *int              `mapstructure:"vnc_port_max" cty:"vnc_port_max" hcl:"vnc_port_max"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
 	CDROMInterface            *string           `mapstructure:"cdrom_interface" required:"false" cty:"cdrom_interface" hcl:"cdrom_interface"`
+	SerialOut                 *bool             `mapstructure:"serial_out" required:"false" cty:"serial_out" hcl:"serial_out"`
 	RunOnce                   *bool             `mapstructure:"run_once" cty:"run_once" hcl:"run_once"`
 }
 
@@ -267,6 +268,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vnc_port_max":                 &hcldec.AttrSpec{Name: "vnc_port_max", Type: cty.Number, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
 		"cdrom_interface":              &hcldec.AttrSpec{Name: "cdrom_interface", Type: cty.String, Required: false},
+		"serial_out":                   &hcldec.AttrSpec{Name: "serial_out", Type: cty.Bool, Required: false},
 		"run_once":                     &hcldec.AttrSpec{Name: "run_once", Type: cty.Bool, Required: false},
 	}
 	return s

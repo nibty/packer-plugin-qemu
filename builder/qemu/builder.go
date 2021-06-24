@@ -36,7 +36,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	// Create the driver that we'll use to communicate with Qemu
-	driver, err := b.newDriver(b.config.QemuBinary)
+	driver, err := b.newDriver(b.config.QemuBinary, ui)
 	if err != nil {
 		return nil, fmt.Errorf("Failed creating Qemu driver: %s", err)
 	}
@@ -204,7 +204,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	return artifact, nil
 }
 
-func (b *Builder) newDriver(qemuBinary string) (Driver, error) {
+func (b *Builder) newDriver(qemuBinary string, ui packersdk.Ui) (Driver, error) {
 	qemuPath, err := exec.LookPath(qemuBinary)
 	if err != nil {
 		return nil, err
@@ -219,6 +219,8 @@ func (b *Builder) newDriver(qemuBinary string) (Driver, error) {
 	driver := &QemuDriver{
 		QemuPath:    qemuPath,
 		QemuImgPath: qemuImgPath,
+		ui:          ui,
+		config:      b.config,
 	}
 
 	if err := driver.Verify(); err != nil {

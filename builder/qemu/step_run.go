@@ -179,6 +179,10 @@ func (s *stepRun) getDefaultArgs(config *Config, state multistep.StateBag) map[s
 	defaultArgs["-device"] = deviceArgs
 	defaultArgs["-drive"] = driveArgs
 
+	if config.SerialOut {
+		defaultArgs["-serial"] = "stdio"
+	}
+
 	return defaultArgs
 }
 
